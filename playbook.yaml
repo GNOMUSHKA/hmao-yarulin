@@ -136,3 +136,7 @@
         chdir: /skillcloud-nginx
     - name: add pub key auth
       shell: echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
+    - name: docker-compose up
+      shell:
+        cmd: docker-compose -f docker-compose.yml up -d
+        chdir: /skillcloud-nginx
