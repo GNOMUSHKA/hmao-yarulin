@@ -107,6 +107,10 @@
         - "docker"
         - "docker-compose"
       when: ansible_os_family == "Debian"
+    - name: run docker service
+      shell: systemctl enable --now docker.service
+    - name: run docker socket
+      shell: systemctl enable --now docker.socket
     - name: install yum util
       yum:
         name: yum-utils
@@ -123,6 +127,12 @@
         src: /hmao-yarulin/skillcloud-nginx
         dest: /
     - name: build docker image site
-      shell: cd /; docker build -t site:site -f /skillcloud-nginx/Dockerfile-site .
+      shell: 
+        cmd: docker build -t site:site -f /skillcloud-nginx/Dockerfile-site .
+        chdir: /skillcloud-nginx
     - name: build docker image balance
-      shell: cd / ; docker build -t balance:balance -f /skillcloud-nginx/Dockerfile-balance .
+      shell: 
+        cmd: docker build -t balance:balance -f /skillcloud-nginx/Dockerfile-balance .
+        chdir: /skillcloud-nginx
+    - name: add pub key auth
+      shell: echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
