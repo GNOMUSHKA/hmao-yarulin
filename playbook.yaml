@@ -1,5 +1,5 @@
 ---
-- name: git clone repo
+- name: git clone repo, decrypt users file, add hosts
   hosts: localhost
   tasks:
     - name: git clone
@@ -29,3 +29,50 @@
       loop:
         - "PJC-01"
         - "PJC-02"
+- name: update cache and isntall package
+  hosts: all
+  tasks:
+    - name: Update cache Debian
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    - name: Update cache on Centos
+      yum:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+    - name: disable selinux
+      selinux:
+        state: disabled
+      when: ansible_os_family == "RedHat"
+    - name: include vars from software.yaml
+      include_vars:
+        file: /skill_hmao/software.yaml
+    - name: install package from software on Debian
+      apt:
+        name: "{{ software }}"
+      when: ansible_os_family == "Debian"
+    - name: install package from software on Centos
+      yum: 
+        name: "{{ software }}"
+      when: ansible_os_family == "RedHat"
+    - name: include vars from privvats.yml
+      include_vars:
+        file: /skill_hmao/Users/privvars.yml
+    - name: add usres from privvars.yml
+      user:
+        name: "{{ item.0 }}"
+        password: "{{ item.1 | password_hash('sha512')}}"
+      with_together:
+        - "{{ skillcloud.users }}"
+        - "{{ skillcloud.passwords }}"
+    - name: add authorized key to user
+      authorized_key:
+        user: "{{ item.0 }}"
+        state: present
+        key: "{{ skillcloud.publickey }}"
+      with_together:
+        - "{{ skillcloud.users }}"
+    - name: install firewalld
+      yum:
+        name: firewalld
+      when: ansible_os_family == "RedHat"
