@@ -107,10 +107,6 @@
         - "docker"
         - "docker-compose"
       when: ansible_os_family == "Debian"
-    - name: run docker service
-      shell: systemctl enable --now docker.service
-    - name: run docker socket
-      shell: systemctl enable --now docker.socket
     - name: install yum util
       yum:
         name: yum-utils
@@ -122,6 +118,10 @@
       yum:
         name: docker-ce
       when: ansible_os_family == "RedHat"
+    - name: run docker service
+      shell: systemctl enable --now docker.service
+    - name: run docker socket
+      shell: systemctl enable --now docker.socket
     - name: copy skillcloud-nginx
       copy:
         src: /hmao-yarulin/skillcloud-nginx
