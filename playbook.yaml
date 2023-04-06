@@ -1,0 +1,31 @@
+---
+- name: git clone repo
+  hosts: localhost
+  tasks:
+    - name: git clone
+      git:
+        repo: https://github.com/andgabs/skill_hmao
+        dest: /skill_hmao
+        clone: yes
+    - name: decrypt users file
+      shell: ansible-vault decrypt --vault-id /hmao-yarulin/password /skill_hmao/Users/privvars.yml
+    - name: add hosts Debian
+      add_host:
+        name: "{{ item }}"
+        group: Debian
+        ansible_ssh_user: root
+        ansible_ssh_pass: toor
+        ansible_host_key_checking: false
+      loop:
+        - "PJD-01"
+        - "PJD-02"
+    - name: add hosts CentOS
+      add_host:
+        name: "{{ item }}"
+        group: Centos
+        ansible_ssh_user: root
+        ansible_ssh_pass: toor
+        ansible_host_key_checking: false
+      loop:
+        - "PJC-01"
+        - "PJC-02"
