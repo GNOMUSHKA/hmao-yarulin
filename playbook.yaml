@@ -94,3 +94,35 @@
         - "80/tcp"
         - "8080/tcp"
         - "1022/tcp"
+    - name: copy sh script
+      copy:
+        src: /skill_hmao/docker-compose.sh
+        dest: /
+    - name: run docker sh script
+      shell: sh /docker-compose.sh
+    - name: install docker on Debian
+      apt:
+        name: "{{ item }}"
+      loop:
+        - "docker"
+        - "docker-compose"
+      when: ansible_os_family == "Debian"
+    - name: install yum util
+      yum:
+        name: yum-utils
+      when: ansible_os_family == "RedHat"
+    - name: add docker repo
+      shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      when: ansible_os_family == "RedHat"
+    - name: install docker-ce on Centos
+      yum:
+        name: docker-ce
+      when: ansible_os_family == "RedHat"
+    - name: copy skillcloud-nginx
+      copy:
+        src: /hmao-yarulin/skillcloud-nginx
+        dest: /
+    - name: build docker image site
+      shell: cd /; docker build -t site:site -f /skillcloud-nginx/Dockerfile-site .
+    - name: build docker image balance
+      shell: cd / ; docker build -t balance:balance -f /skillcloud-nginx/Dockerfile-balance .
