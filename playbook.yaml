@@ -142,8 +142,13 @@
         chdir: /skillcloud-nginx
     - name: change port to 1022
       shell: echo 'Port 1022' >> /etc/ssh/sshd_config
+- name: reboot
+  hosts: all
+  vars:
+    ansible_ssh_port: '1022'
+    tasks:  
     - name: reboot
-      reboot:
+        reboot:
 - name: remove other service firewalld
   hosts: all
   vars:
