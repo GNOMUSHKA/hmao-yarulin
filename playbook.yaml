@@ -31,6 +31,8 @@
         - "PJC-02"
 - name: update cache and isntall package
   hosts: all
+  vars:
+    ansible_ssh_port: '1022'
   tasks:
     - name: Update cache Debian
       apt:
@@ -140,3 +142,29 @@
       shell:
         cmd: docker-compose -f docker-compose.yml up -d
         chdir: /skillcloud-nginx
+    - name: change port to 1022
+      shell: echo 'Port 1022' >> /etc/ssh/sshd_config
+- name: reboot
+  hosts: all
+  vars:
+    ansible_port: '1022'
+  tasks:
+    - name: reboot
+      reboot:
+- name: remove other service firewalld
+  hosts: all
+  vars:
+    ansible_ssh_port: '1022'
+  tasks:
+    - name: remove service
+      firewalld:
+        service: dhcpv6-client
+        state: disabled
+    - name: remove cockpit
+      firewalld:
+        service: cockpit
+        state: disabled
+    - name: restart firewalld
+      shell: systemctl restart firewalld
+    - name: ping
+      ping:
