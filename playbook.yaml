@@ -32,6 +32,8 @@
 - name: update cache and isntall package
   hosts: all
   tasks:
+    - name: test connection
+      ping:
     - name: Update cache Debian
       apt:
         update_cache: yes
@@ -140,33 +142,10 @@
       shell:
         cmd: docker-compose -f docker-compose.yml up -d
         chdir: /skillcloud-nginx
-    - name: change port to 1022
-      shell: echo 'Port 1022' >> /etc/ssh/sshd_config
-- name: reboot
-  hosts: all
-  vars:
-    ansible_ssh_port: '1022'
-    tasks:  
-    - name: reboot
-        reboot:
-- name: remove other service firewalld
-  hosts: all
-  vars:
-    ansible_ssh_port: '1022'
-  tasks:
-    - name: remove service
-      firewalld:
-        service: dhcpv6-client
-        state: disabled
-    - name: remove cockpit
-      firewalld:
-        service: cockpit
-        state: disabled
-    - name: disable 22 port
-      firewalld:
-        port: 22
-        state: disabled
+    - name: restart ssh
+      shell: systemctl restart ssh
+      when: ansible_os_family == "Debian"
     - name: restart firewalld
       shell: systemctl restart firewalld
-    - name: ping
-      ping:
+    - name: restart sshd 
+      shell: systemctl restart sshd
